@@ -10,5 +10,5 @@ Big thanks to this blog post: https://peterbeshai.com/blog/2018-10-28-p5js-ccapt
 docker build . --force-rm
 
 ## then (and subsequent times)
-docker run -d -p 5555:5555 -p 35729:35729 -v"$(PWD)":/app p5manager; sleep 5; open http://localhost:5555
+docker run -d -p 5555:5555 -p 35729:35729 -v"$(PWD)":/app p5manager; sleep 3; open http://localhost:5555
 ```
