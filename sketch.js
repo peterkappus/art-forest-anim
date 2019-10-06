@@ -1,18 +1,31 @@
-var i = 0;
+"use strict";
 
+var i = 0;
 //how many frames to capture
 var totalFrames = 0;
 
 var canvas;
 var capturer;
-var spacing = 0; //how close can they get?
+var spacing = 5; //how close can they get?
+var dr = spacing/10;
 
 var colors = ["#fc0","#ff5c00","#0066ff","#ee1111","#ff2e00"];
 
 var circs = [];
 
 function setup() {
-  canvas = createCanvas(window.innerWidth, window.innerHeight);
+  //square
+  var canvasHeight, canvasWidth;
+  canvasHeight = canvasWidth = window.innerHeight * 0.8;
+  
+  //use the shorter of the two dimensions
+  if( window.innerHeight > window.innerWidth) {
+    canvasHeight = canvasWidth = window.innerWidth * 0.9;
+  }  
+  
+  canvas = createCanvas(canvasWidth, canvasHeight);
+  //canvas = createCanvas(window.innerWidth, window.innerHeight);
+  
   if(totalFrames > 0) {
     //capturer = new CCapture( { format: 'webm', verbose: true } );
     //capturer = new CCapture( { format: 'png' } );
@@ -41,9 +54,9 @@ function draw() {
     return;
   }
   
-  c = new Circle(random(width),random(height));
+  var c = new Circle(random(width),random(height));
   
-  if(c.hasSpace(circs,-1)) {
+  if(c.hasSpace(circs,-1) && random(5) < 1) {
     circs.push(c);
   }
   
@@ -74,7 +87,7 @@ class Circle{
   constructor(x,y){
     this.x = x;
     this.y = y;
-    this.growing = true;
+    this.alive = true;
     this.rad = 1;
     this.fill = random(colors);
     this.stroke = random(colors);
@@ -123,13 +136,14 @@ class Circle{
   }
   
   step(circs, myIndex){
-    if(this.hasSpace(circs,myIndex) && this.growing) {
-      this.rad++;
+    if(this.hasSpace(circs, myIndex) && this.alive) {
+      this.rad += dr;
+    }else{
+      this.rad -= dr;
     }
     
-    if(random(100) < 1) {
-      this.growing = false;
-    }
+    
+    
 
     this.strokeWeight = this.strokeWeightFactor * this.rad;
   }
