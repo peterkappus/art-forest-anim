@@ -2,15 +2,16 @@
 
 var frame = 0;
 //how many frames to capture
-var totalFrames = 0;
+var totalFrames = 50;
 
 var canvas;
 var capturer;
 var spacing = 1; //how close can they get?
-var dr = spacing/10;
-var maxAge = 100;
+var dr = 0.5;
+var spawnProbability = 90;
+var maxAge = 500;
 
-//var colors = ["#fc0","#ff5c00","#0066ff","#ee1111","#ff2e00"];
+var colors = ["#fc0","#ff5c00","#0066ff","#ee1111","#ff2e00"];
 //var colors = ["#eee","#aaa","#111","#333"];
 
 var circs = [];
@@ -40,6 +41,9 @@ function setup() {
 }
 
 function draw() {
+  //debug(frame);
+  background(0);
+  
   frame++;
   
   if(totalFrames > 0) {
@@ -56,37 +60,32 @@ function draw() {
   if(totalFrames > 0 && frame >= totalFrames){
     return;
   }
-  debug(frame);
+  
+  //debug(circs.length);
   
   var c = new Circle(random(width),random(height));
   
-  if(c.hasSpace(circs,-1) && random(5) < 1) {
+  if(c.hasSpace(circs,-1) && random(100) < spawnProbability) {
     circs.push(c);
   }
   
-  //console.log(circs.length);
-
-  background(0);
-  
-  //iterate our circs
+  //see if any need to be removed.
   for(var i in circs) {
     c = circs[i];
-
     //remove tiny or any overlapping ones
     if(c.rad < 1) {
-      //console.log("bye");
-      //c = null;
-      //debug(circs.length);
-      //remove this one
       circs.splice(i,1);
-      //debug("then:" + circs.length);
-    }else{
-      //otherwise, step through
-      c.step(circs,i);
-      
-      //then draw
-      c.draw();      
     }
+  }
+  
+  //now step & draw the ones that are left
+  for(var i in circs) {
+    c = circs[i];
+    //otherwise, step through
+    c.step(circs,i);
+    
+    //then draw
+    c.draw();      
   }
 }
 
@@ -99,12 +98,15 @@ class Circle{
     this.x = x;
     this.y = y;
     this.growing = true;
+    this.alive = true;
     this.rad = 1;
-    //this.fill = random(colors);
-    //this.stroke = random(colors);
+    //splice random colours out of a copy so we don't get the same one for both fill and stroke
+    var cs = colors.slice(0);
+    this.fill = cs.splice(random(cs.length),1);
+    this.stroke = cs.splice(random(cs.length),1);
     this.strokeWeightFactor = random(0.5,0.8);
-    this.fill = random(255);
-    this.stroke = random(255);
+    /*this.fill = random(255);
+    this.stroke = random(255);*/
     this.strokeWeight = this.strokeWeightFactor * this.rad;
     this.age = 0;
   }
@@ -160,8 +162,12 @@ class Circle{
       this.rad += dr;
     }
     
-    if(this.age > maxAge) {
-      //this.rad -= dr;
+    if(random(100) < 2) {
+      this.alive = false;
+    }
+    
+    if(!this.alive) {
+      this.rad -= dr;
     }
     
     this.strokeWeight = this.strokeWeightFactor * this.rad;
