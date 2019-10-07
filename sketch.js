@@ -1,15 +1,17 @@
 "use strict";
 
-var i = 0;
+var frame = 0;
 //how many frames to capture
 var totalFrames = 0;
 
 var canvas;
 var capturer;
-var spacing = 5; //how close can they get?
+var spacing = 1; //how close can they get?
 var dr = spacing/10;
+var maxAge = 100;
 
-var colors = ["#fc0","#ff5c00","#0066ff","#ee1111","#ff2e00"];
+//var colors = ["#fc0","#ff5c00","#0066ff","#ee1111","#ff2e00"];
+//var colors = ["#eee","#aaa","#111","#333"];
 
 var circs = [];
 
@@ -28,19 +30,17 @@ function setup() {
   
   if(totalFrames > 0) {
     //capturer = new CCapture( { format: 'webm', verbose: true } );
-    //capturer = new CCapture( { format: 'png' } );
-    capturer = new CCapture( { format: 'gif', workersPath: '' } );
+    capturer = new CCapture( { format: 'png' } );
+    //capturer = new CCapture( { format: 'gif', workersPath: '' } );
     
     capturer.start();
     
   }
   
-  circs.push(new Circle(random(width),random(height)));
-
 }
 
 function draw() {
-  i++;
+  frame++;
   
   if(totalFrames > 0) {
     //capture the frame
@@ -48,11 +48,15 @@ function draw() {
   }
   
   //stop and save after 50 iterations
-  if(i == totalFrames && totalFrames > 0) {
+  if(frame == totalFrames && totalFrames > 0) {
     capturer.stop();
     capturer.save();
+  }
+  
+  if(totalFrames > 0 && frame >= totalFrames){
     return;
   }
+  debug(frame);
   
   var c = new Circle(random(width),random(height));
   
@@ -65,34 +69,44 @@ function draw() {
   background(0);
   
   //iterate our circs
-  for(i in circs) {
+  for(var i in circs) {
     c = circs[i];
 
     //remove tiny or any overlapping ones
-    if(c.rad < 1 && !c.hasSpace(circs,i)) {
-      console.log("bye");
+    if(c.rad < 1) {
+      //console.log("bye");
+      //c = null;
+      //debug(circs.length);
       //remove this one
       circs.splice(i,1);
+      //debug("then:" + circs.length);
+    }else{
+      //otherwise, step through
+      c.step(circs,i);
+      
+      //then draw
+      c.draw();      
     }
-    //otherwise, step through
-    c.step(circs,i);
-    
-    //then draw
-    c.draw();
   }
 }
 
+function debug(msg){
+  console.log(msg);
+}
 
 class Circle{
   constructor(x,y){
     this.x = x;
     this.y = y;
-    this.alive = true;
+    this.growing = true;
     this.rad = 1;
-    this.fill = random(colors);
-    this.stroke = random(colors);
+    //this.fill = random(colors);
+    //this.stroke = random(colors);
     this.strokeWeightFactor = random(0.5,0.8);
+    this.fill = random(255);
+    this.stroke = random(255);
     this.strokeWeight = this.strokeWeightFactor * this.rad;
+    this.age = 0;
   }
   
   draw() {
@@ -136,15 +150,20 @@ class Circle{
   }
   
   step(circs, myIndex){
-    if(this.hasSpace(circs, myIndex) && this.alive) {
-      this.rad += dr;
-    }else{
-      this.rad -= dr;
+    this.age++;
+    
+    if(!this.hasSpace(circs, myIndex)) {
+      this.growing = false;
     }
     
+    if(this.growing) {
+      this.rad += dr;
+    }
     
+    if(this.age > maxAge) {
+      //this.rad -= dr;
+    }
     
-
     this.strokeWeight = this.strokeWeightFactor * this.rad;
   }
 }
