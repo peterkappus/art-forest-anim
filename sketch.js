@@ -2,7 +2,7 @@
 
 var frame = 0;
 //how many frames to capture
-var totalFrames = 50;
+var totalFrames = 800;
 
 var canvas;
 var capturer;
@@ -41,33 +41,27 @@ function setup() {
 }
 
 function draw() {
-  //debug(frame);
-  background(0);
   
   frame++;
   
-  if(totalFrames > 0) {
-    //capture the frame
-    capturer.capture( document.getElementById('defaultCanvas0') );
-  }
-  
-  //stop and save after 50 iterations
-  if(frame == totalFrames && totalFrames > 0) {
-    capturer.stop();
-    capturer.save();
-  }
-  
-  if(totalFrames > 0 && frame >= totalFrames){
+  if(totalFrames > 0 && frame > totalFrames){
     return;
   }
   
-  //debug(circs.length);
+  background(0);
   
-  var c = new Circle(random(width),random(height));
+  //debug(frame);
   
-  if(c.hasSpace(circs,-1) && random(100) < spawnProbability) {
-    circs.push(c);
-  }
+  
+  //make new ones in the first half... then let them decay
+  //if(frame < totalFrames * 0.5 || totalFrames == 0) {
+    var c = new Circle(random(width),random(height));
+    
+    if(c.hasSpace(circs,-1) && random(100) < spawnProbability) {
+      circs.push(c);
+    }    
+  //}
+  
   
   //see if any need to be removed.
   for(var i in circs) {
@@ -87,7 +81,19 @@ function draw() {
     //then draw
     c.draw();      
   }
+  
+  if(totalFrames > 0) {
+    capturer.capture( document.getElementById('defaultCanvas0') );
+  }
+  
+  //stop and save after x frames
+  if(frame == totalFrames && totalFrames > 0) {
+    capturer.stop();
+    capturer.save();
+  }
+  
 }
+
 
 function debug(msg){
   console.log(msg);

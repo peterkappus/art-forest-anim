@@ -12,3 +12,7 @@ docker build . --force-rm
 ## then (and subsequent times)
 docker run -d -p 5555:5555 -p 35729:35729 -v"$(PWD)":/app p5manager; sleep 3; open http://localhost:5555
 ```
+
+
+## Convert:
+```docker run -v "$(PWD)"/out:/mnt jrottenberg/ffmpeg -r 30 -f image2 -s 540x540 -i "/mnt/%07d.png" -vcodec libx264 -crf 17 -pix_fmt yuv420p /mnt/output.mp4```
